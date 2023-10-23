@@ -182,8 +182,50 @@ Nessa sessão o gráfico de barras exibirá o faturamento anual por categoria:
     theme_estat()
 
 
+  summary(vendas$Price)
+# Variação do preço por marca 
+  A análise a seguir tem como objetivo acompanhar entender a variação preço de acordo com a marca do produto.
+  Para esse estudo,utiliza-se as variáveis "Price" e "Brand",que são classificadas,respectivamente, como quantitativa contínua e qualitativa nominal.As observações da variável "Price", ou seja, os preços variam de 10 a 100 reais.
+  
+vendas <- vendas%>%
+  filter(!is.na(Price))%>%
+  filter(!is.na(Brand))
+  Resultado_7 <- ggplot(vendas) +
+    aes(x = fct_reorder(Brand,Price), y = Price) +
+    geom_boxplot(fill = c("#A11D21"), width = 0.5) +
+    stat_summary(
+      fun = "mean", geom = "point", shape = 23, size = 3, fill = "white"
+    ) +
+    labs(x = "Marcas", y = "Preços") +
+    theme_estat()
+  ggsave(filename = file.path(caminho_Humberto, "Resultado_7.pdf"), width = 158, height = 93, units = "mm")
+view(Resultado_7)
+  library(dplyr)
+  
+  quadro_resumo <- vendas %>% 
+    group_by(Brand) %>% 
+    summarize(Média = round(mean(Price), 2),
+              `Desvio Padrão` = round(sd(Price), 2),
+              `Variância` = round(var(Price), 2),
+              `Mínimo` = round(min(Price), 2),
+              `1º Quartil` = round(quantile(Price, probs = 0.25), 2),
+              Mediana = round(quantile(Price, probs = 0.5), 2),
+              `3º Quartil` = round(quantile(Price, probs = 0.75), 2),
+              `Máximo` = round(max(Price), 2)) %>%
+    arrange(Média) %>%  # Ordenar pelo valor da média
+    t() %>% as.data.frame()
+  
+  xtable::xtable(quadro_resumo)
+  
 
-theme_estat <- function(...) {
+Avaliando marca por marca, observa-se nos box plots e no quadro de medidas resumo uma certa proximidade
+nos valores.Em todos os casos as medianas são semelhantes as médias,indicando uma distruibuição simétrica,onde não há muitos valores aberrantes.
+Em todas as marcas, 50% dos valores se concentram abaixo dos 53 reais.Portanto, extrai-se desse estudo, que as marcas do empreendimento estão precificando seus produtos
+similarmente.
+  
+
+  
+  theme_estat <- function(...) {
  theme <- ggplot2::theme_bw() +
     ggplot2::theme(
       axis.title.y = ggplot2::element_text(colour = "black", size = 12),
