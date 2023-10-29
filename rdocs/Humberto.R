@@ -224,8 +224,71 @@ Em todas as marcas, 50% dos valores se concentram abaixo dos 53 reais.Portanto, 
 similarmente.
   
 
+
+
+# Análise 3
+v <- vendas %>%
+  group_by(Color)%>%
+summarise(cont = n() )
+
+A análise a seguir nos permite compreender 
+
+vendas <- vendas%>%
+filter(Category != "Kids' Fashion")
+vendas <- vendas%>%
+  filter(!is.na(Color))%>%
+  filter(!is.na(Category))
+
+Quadro <- vendas %>%
+  mutate(Category = case_when(
+    Category %>% str_detect("Men's Fashion") ~ "Masculina",
+    Category %>% str_detect("Women's Fashion") ~ " Feminina"
+  )) %>%
+  group_by(Color,Category) %>%
+  summarise(freq = n()) %>%
+  mutate(
+    freq_relativa = round(freq/sum(freq)*100,1)
+      
+  )
+
+porcentagens <- str_c(Quadro$freq_relativa, "%") %>% str_replace("\\.", ",")
+
+legendas <- str_squish(str_c(Quadro$freq, " (", porcentagens, ")"))
+
+ggplot(Quadro) +
+  aes(
+    x = fct_reorder(Category, freq, .desc = T), y = freq_relativa,
+    fill = Color, label = legendas
+  ) +
+  geom_col(position = position_dodge2(preserve = "single", padding = 0)) +
+  geom_text(
+    position = position_dodge(width = .9),
+    vjust = -0.5, hjust = 0.5,
+    size = 3
+  ) +
+  labs(x = "Cores por categoria", y = "Frequência") +
+  theme_estat()
+
+ggplot(Quadro) +
+  aes(x= fct_reorder(Category,freq_relativa, .desc = TRUE), y = freq_relativa,fill = Category, label = legendas) +
+  geom_bar(stat = "Identity")+
+  geom_col(position = position_dodge2(preserve = "single", padding = 0)) +
+  geom_text(
+    position = position_dodge(width = .5),
+    vjust = -0.5, hjust = 0.5,
+    size = 3
+  ) +
+  facet_wrap(Color ~ .) +
+  labs(x="Categoria", y="Frequência relativa") +
+  ylim(0,60)+
+  theme_estat(
+    strip.text = element_text(size=12),
+    strip.background = element_rect(colour="black", fill="white")
+  ) 
+ggsave(filename = file.path(caminho_Humberto, "Grafico_8.pdf"), width = 128, height = 130, units = "mm")
+
   
-  theme_estat <- function(...) {
+theme_estat <- function(...) {
  theme <- ggplot2::theme_bw() +
     ggplot2::theme(
       axis.title.y = ggplot2::element_text(colour = "black", size = 12),
