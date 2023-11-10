@@ -10,6 +10,8 @@ library(tidyverse)
 caminho_Humberto <- "resultados"
 ggsave(filename = file.path(caminho_Humberto, "Quantidade/dep.pdf"), width = 158, height = 93, units = "mm")
 
+vendas <- vendas %>%
+  distinct(`Unique ID`, .keep_all = TRUE)
 # Análise 3.1(introdução): Faturamento Anual do shopping.
 Inicialmente, é importante salientar o resultado do faturamneto total do shopping, que é demosntrado pelo seguinte valor:
   
@@ -288,6 +290,38 @@ ggplot(Quadro) +
 ggsave(filename = file.path(caminho_Humberto, "Grafico_8.pdf"), width = 128, height = 130, units = "mm")
 
   
+
+
+# análise 4
+
+Analisou-se nesse estudo como se comportamento das variáveis "Price" e "Rating".Ambas as variáveis são quantitativas contínuas, com a variável "Rating" representando as notas dos produtos, que varia de 1.056 a 4.183 pontos.
+
+
+vendas <- vendas%>%
+filter(!is.na(Price))%>%
+filter(!is.na(Rating))
+
+ggplot(vendas) +
+  aes(x = Rating, y = Price) +
+  geom_point(colour = "#A11D21", size = 2, alpha = 0.75) +
+  labs(
+    x = " Nota do produto",
+    y = "Valor do produto "
+  ) +
+  theme_estat()
+ggsave(filename = file.path(caminho_Humberto, "Grafico_9.pdf"), width = 158, height = 93, units = "mm")
+
+ H <- cor.test(vendas$Price ,vendas$Rating ,method = "spearman")
+print(H)
+
+A partir da observação do gráfico de dispersão acima, é possível identificar um comportamento controlado da nuvem de pontos,ou seja,
+os valores observados aparentam seguir uma proporcionalidade. Analogamente, o gráfico apresenta
+ uma correlção intensa entre as variáveis analisadas, de maneira que o preço dos produtos sobe ou desce, conforme sua avaliação.
+Com o objetivo de ratificar esse resultado, foi obtido o coeficiente de spearman para as variáveis em questão, apontando o valor de 0.9054.
+Sabendo que, o teste de pearson varia de -1 a 1, sendo -1 e 1 os extremos que sinalizam uma maior correlação, vizualiza-se o valor de 0.9054 como um indicador de uma forte correlação entre as variantes em pauta.
+
+
+
 theme_estat <- function(...) {
  theme <- ggplot2::theme_bw() +
     ggplot2::theme(
