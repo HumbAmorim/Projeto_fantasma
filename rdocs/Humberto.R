@@ -322,6 +322,60 @@ Sabendo que, o teste de pearson varia de -1 a 1, sendo -1 e 1 os extremos que si
 
 
 
+## Análise 5
+
+library(readr)
+devolução_atualizado <- read_csv("banco/devolução_atualizado.csv")
+View(devolução_atualizado)
+
+vendas <- left_join(devolução_atualizado, vendas,by = "Unique ID")
+
+
+vendas <- vendas%>%
+  filter(!is.na(Brand))%>%
+  rename("Motivo devolução" = `Motivo devolução.x`)
+Quadro_2 <- vendas %>%
+  mutate( Brand = case_when(
+    Brand %>% str_detect("Nike") ~ "Nike",
+    Brand %>% str_detect("Zara") ~ " Zara ",
+    Brand %>% str_detect("H&M") ~ " H&M",
+    Brand %>% str_detect("Adidas") ~ "Adidas ",
+    Brand %>% str_detect("Gucci") ~ "Gucci"
+    
+    )) %>%
+  group_by(`Motivo devolução`,Brand) %>%
+  summarise(freq = n()) %>%
+  mutate(
+    freq_relativa = round(freq/sum(freq)*100,1)
+    
+  )
+
+
+porcentagens <- str_c(Quadro_2$freq_relativa, "%") %>% str_replace("\\.", ",")
+
+legendas <- str_squish(str_c(Quadro_2$freq, " (", porcentagens, ")"))
+
+ggplot(Quadro_2) +
+  aes(
+    x = fct_reorder(Brand, freq, .desc = T), y = freq,
+    fill =`Motivo devolução`, label = legendas
+  ) +
+  geom_col(position = position_dodge2(preserve = "single", padding = 0)) +
+  geom_text(
+    position = position_dodge(width = .9),
+    vjust = -0.5, hjust = 0.5,
+    size = 3
+  ) +
+  labs(x = "Marca", y = "Frequência") +
+  theme_estat()
+ggsave(filename = file.path(caminho_Humberto, "Grafico_10.pdf"), width = 158, height = 110, units = "mm")
+
+
+
+
+
+
+
 theme_estat <- function(...) {
  theme <- ggplot2::theme_bw() +
     ggplot2::theme(
